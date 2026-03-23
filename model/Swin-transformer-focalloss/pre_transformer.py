@@ -63,8 +63,7 @@ def positional_encoding_1d(position, d_model):
     angle_rads[:, 0::2] = np.sin(angle_rads[:, 0::2])
     angle_rads[:, 1::2] = np.cos(angle_rads[:, 1::2])
     pos_encoding = angle_rads[np.newaxis, ...]
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    return torch.from_numpy(pos_encoding.astype('float32')).to(device)
+    return torch.from_numpy(pos_encoding.astype('float32'))
 
 
 class FeedForward(nn.Module):
@@ -178,7 +177,7 @@ class TransformerEncodeLayer(nn.Module):
 class TransformerEncode(nn.Module):
     def __init__(self, dim, ff_dim, num_head, encoder_num_layer, dropout, max_len):
         super().__init__()
-        self.pos_encoding_1d = positional_encoding_1d(max_len, dim)
+        self.register_buffer('pos_encoding_1d', positional_encoding_1d(max_len, dim))
         self.encoder_num_layer = encoder_num_layer
         self.layer = nn.ModuleList([
             TransformerEncodeLayer(dim, ff_dim, num_head,dropout=dropout) for i in range(encoder_num_layer)
@@ -254,7 +253,7 @@ class TransformerDecode(nn.Module):
     def __init__(self, dim, ff_dim, num_head, decoder_num_layer, vocab_size, max_len, drop_rate=0):
         super().__init__()
         self.token_embed = nn.Embedding(vocab_size, dim)
-        self.pos_encoding_1d = positional_encoding_1d(max_len, dim)
+        self.register_buffer('pos_encoding_1d', positional_encoding_1d(max_len, dim))
         self.num_layer = decoder_num_layer
         self.layer = nn.ModuleList([
             TransformerDecodeLayer(dim, ff_dim, num_head,dropout=drop_rate) for i in range(decoder_num_layer)

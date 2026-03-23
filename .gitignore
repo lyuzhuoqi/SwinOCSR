@@ -1,0 +1,8 @@
+# Model checkpoints
+*.pth
+*.pth.zip
+*.bin
+
+# Python
+__pycache__/
+*.py[cod]

@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import math, copy, time
 from torch.autograd import Variable
 #from apex import amp
-from torch.cuda import amp
+from torch import amp
 
 # import matplotlib.pyplot as plt
 # import seaborn
@@ -290,7 +290,7 @@ class Transformer(nn.Module):
         self.encoder = TransformerEncode(dim=dim, ff_dim=ff_dim, num_head=num_head, encoder_num_layer=encoder_num_layer, dropout=drop_rate, max_len=max_len)
         self.decoder = TransformerDecode(dim=dim, ff_dim=ff_dim, num_head=num_head, decoder_num_layer=decoder_num_layer, vocab_size=vocab_size, max_len=max_len, drop_rate=drop_rate)
     def forward(self, label, mem, x_mask=None, mem_mask=None):
-        with amp.autocast(self.tag):
+        with amp.autocast('cuda', enabled=self.tag):
             mem = self.encoder_dim(mem)
             mem = self.encoder(mem)
             predictions = self.decoder(label, mem, x_mask)
